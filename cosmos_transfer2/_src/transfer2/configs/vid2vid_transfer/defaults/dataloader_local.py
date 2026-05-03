@@ -24,6 +24,14 @@ from cosmos_transfer2._src.predict2.datasets.local_datasets.dataset_video import
 from cosmos_transfer2._src.transfer2.datasets.local_datasets.singleview_dataset import SingleViewTransferDataset
 
 
+def _get_video_size_from_env(name: str, default: tuple[int, int]) -> tuple[int, int]:
+    value = os.environ.get(name)
+    if not value:
+        return default
+    height, width = value.split(",", 1)
+    return int(height), int(width)
+
+
 def register_dataloader_local() -> None:
     """Register local dataloader configurations for post-training.
 
@@ -113,8 +121,8 @@ def register_dataloader_local() -> None:
     dataset_flow = L(SingleViewTransferDataset)(
         dataset_dir=os.environ.get("SURGFLOW_COSMOS_DATASET_DIR", "/data/outputs/cosmos"),
         num_frames=int(os.environ.get("SURGFLOW_COSMOS_NUM_FRAMES", "13")),  # Match state_t=4: (4-1)*4+1=13
-        video_size=(704, 1280),
-        resolution="720",
+        video_size=_get_video_size_from_env("SURGFLOW_COSMOS_VIDEO_SIZE", (704, 1280)),
+        resolution=os.environ.get("SURGFLOW_COSMOS_RESOLUTION", "720"),
         hint_key="control_input_flow",
         is_train=True,
         caption_type="t2w_qwen2p5_7b",
