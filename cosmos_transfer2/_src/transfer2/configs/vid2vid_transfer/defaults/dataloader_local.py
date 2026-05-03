@@ -108,6 +108,31 @@ def register_dataloader_local() -> None:
         ),
     )
 
+    # Flow (optical flow) control example
+    dataset_flow = L(SingleViewTransferDataset)(
+        dataset_dir="PLACEHOLDER_UPDATE_DATASET_PATH",  # Override this in your experiment config
+        num_frames=93,  # Match state_t=24: (24-1)*4+1=93
+        video_size=(704, 1280),
+        resolution="720",
+        hint_key="control_input_flow",
+        is_train=True,
+        caption_type="t2w_qwen2p5_7b",
+    )
+
+    cs.store(
+        group="data_train",
+        package="dataloader_train",
+        name="example_singleview_train_data_flow",
+        node=L(get_generic_dataloader)(
+            dataset=dataset_flow,
+            sampler=L(get_sampler)(dataset=dataset_flow) if dist.is_initialized() else None,
+            batch_size=1,
+            drop_last=True,
+            num_workers=4,
+            pin_memory=True,
+        ),
+    )
+
     # Vis (Blur) control example
     dataset_vis = L(SingleViewTransferDataset)(
         dataset_dir="PLACEHOLDER_UPDATE_DATASET_PATH",  # Override this in your experiment config

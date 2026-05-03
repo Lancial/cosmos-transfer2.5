@@ -42,11 +42,13 @@ class ControlVideo2WorldCondition(Video2WorldCondition):
     control_input_edge: Optional[torch.Tensor] = None
     control_input_vis: Optional[torch.Tensor] = None
     control_input_depth: Optional[torch.Tensor] = None
+    control_input_flow: Optional[torch.Tensor] = None
     control_input_seg: Optional[torch.Tensor] = None
     control_input_inpaint: Optional[torch.Tensor] = None
     control_input_edge_mask: Optional[torch.Tensor] = None
     control_input_vis_mask: Optional[torch.Tensor] = None
     control_input_depth_mask: Optional[torch.Tensor] = None
+    control_input_flow_mask: Optional[torch.Tensor] = None
     control_input_seg_mask: Optional[torch.Tensor] = None
     control_input_inpaint_mask: Optional[torch.Tensor] = None
     control_input_hdmap_bbox: Optional[torch.Tensor] = None
@@ -300,6 +302,12 @@ _SHARED_CONFIG = dict(
         dropout_rate=0.0,
         dtype=None,
     ),
+    control_input_flow=L(ReMapkey)(
+        input_key="control_input_flow",
+        output_key="control_input_flow",
+        dropout_rate=0.0,
+        dtype=None,
+    ),
     control_input_seg=L(ReMapkey)(
         input_key="control_input_seg",
         output_key="control_input_seg",
@@ -330,6 +338,12 @@ _SHARED_CONFIG = dict(
         dropout_rate=0.0,
         dtype=None,
     ),
+    control_input_flow_mask=L(ReMapkey)(
+        input_key="control_input_flow_mask",
+        output_key="control_input_flow_mask",
+        dropout_rate=0.0,
+        dtype=None,
+    ),
     control_input_seg_mask=L(ReMapkey)(
         input_key="control_input_seg_mask",
         output_key="control_input_seg_mask",
@@ -348,10 +362,12 @@ _SHARED_CONFIG_AV = copy.deepcopy(_SHARED_CONFIG)
 _SHARED_CONFIG_AV.pop("control_input_edge")
 _SHARED_CONFIG_AV.pop("control_input_vis")
 _SHARED_CONFIG_AV.pop("control_input_depth")
+_SHARED_CONFIG_AV.pop("control_input_flow")
 _SHARED_CONFIG_AV.pop("control_input_seg")
 _SHARED_CONFIG_AV.pop("control_input_edge_mask")
 _SHARED_CONFIG_AV.pop("control_input_vis_mask")
 _SHARED_CONFIG_AV.pop("control_input_depth_mask")
+_SHARED_CONFIG_AV.pop("control_input_flow_mask")
 _SHARED_CONFIG_AV.pop("control_input_seg_mask")
 
 

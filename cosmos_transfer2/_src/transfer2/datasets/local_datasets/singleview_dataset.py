@@ -79,6 +79,7 @@ CTRL_TYPE_INFO = {
     "keypoint": {"folder": "keypoint", "format": "pickle", "data_dict_key": "keypoint"},
     "depth": {"folder": "depth", "format": "mp4", "data_dict_key": "depth"},
     "seg": {"folder": "seg", "format": "mp4", "data_dict_key": "segmentation"},
+    "flow": {"folder": "flow", "format": "mp4", "data_dict_key": "flow"},
     "edge": {"folder": None},  # Canny edge, computed on-the-fly by augmentor
     "vis": {"folder": None},  # Blur, computed on-the-fly by augmentor
 }
@@ -377,6 +378,20 @@ class SingleViewTransferDataset(Dataset):
 
                 # Store with the key expected by AddControlInputDepth augmentor
                 data_dict["depth"] = depth_video
+                del vr
+
+            elif self.ctrl_type == "flow":
+                # Load optical-flow video (3-channel RGB-encoded: dx, dy, magnitude)
+                vr = VideoReader(ctrl_path, ctx=cpu(0))
+                if len(vr) < frame_ids[-1] + 1:
+                    raise ValueError(f"Flow video has fewer frames than RGB video: {ctrl_path}")
+
+                flow_frames = vr.get_batch(frame_ids).asnumpy()  # [T, H, W, C]
+                flow_frames = flow_frames.astype(np.uint8)
+                flow_t = torch.from_numpy(flow_frames).permute(0, 3, 1, 2)  # (T, C, H, W) uint8
+                flow_video = flow_t.permute(1, 0, 2, 3)  # (C, T, H, W) uint8
+
+                data_dict["flow"] = flow_video
                 del vr
 
         except Exception as e:

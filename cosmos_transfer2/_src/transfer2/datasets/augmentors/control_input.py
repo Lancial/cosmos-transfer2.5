@@ -288,6 +288,43 @@ class AddControlInputDepth(Augmentor):
         return data_dict
 
 
+class AddControlInputFlow(Augmentor):
+    """
+    Add optical-flow control input to the data dictionary.
+
+    Mirrors AddControlInputDepth: expects a 3-channel video tensor (C=3, T, H, W) loaded from
+    the dataset's flow/ folder, where channels encode (dx, dy, magnitude) per the dataset's
+    flow.json convention. Resizes to match the current RGB frame size with BILINEAR
+    interpolation (flow values are continuous; NEAREST would alias motion vectors).
+    """
+
+    def __init__(
+        self,
+        input_keys: list,
+        output_keys: Optional[list] = ["control_input_flow"],
+        args: Optional[dict] = None,
+        **kwargs,
+    ) -> None:
+        super().__init__(input_keys, output_keys, args)
+
+    def __call__(self, data_dict: dict) -> dict:
+        if "control_input_flow" in data_dict:
+            return data_dict
+
+        key_out = self.output_keys[0]
+        flow = data_dict["flow"]
+
+        frames = data_dict["video"]
+        _, T, H, W = frames.shape
+        flow = transforms_F.resize(
+            flow,
+            size=(H, W),
+            interpolation=transforms_F.InterpolationMode.BILINEAR,
+        )
+        data_dict[key_out] = flow
+        return data_dict
+
+
 class AddControlInputSeg(Augmentor):
     """
     Add control input to the data dictionary. control input are expanded to 3-channels
@@ -538,6 +575,7 @@ CTRL_HINT_KEYS = {
     "control_input_edge": AddControlInputEdge,
     "control_input_vis": AddControlInputBlur,
     "control_input_depth": AddControlInputDepth,
+    "control_input_flow": AddControlInputFlow,
     "control_input_seg": AddControlInputSeg,
     "control_input_inpaint": AddControlInputIdentity,
     "control_input_hdmap_bbox": AddControlInputHdmapBbox,
