@@ -15,6 +15,7 @@
 
 """Local dataset configurations for single-view post-training."""
 
+import os
 import torch.distributed as dist
 from hydra.core.config_store import ConfigStore
 
@@ -110,8 +111,8 @@ def register_dataloader_local() -> None:
 
     # Flow (optical flow) control example
     dataset_flow = L(SingleViewTransferDataset)(
-        dataset_dir="PLACEHOLDER_UPDATE_DATASET_PATH",  # Override this in your experiment config
-        num_frames=93,  # Match state_t=24: (24-1)*4+1=93
+        dataset_dir=os.environ.get("SURGFLOW_COSMOS_DATASET_DIR", "/data/outputs/cosmos"),
+        num_frames=int(os.environ.get("SURGFLOW_COSMOS_NUM_FRAMES", "13")),  # Match state_t=4: (4-1)*4+1=13
         video_size=(704, 1280),
         resolution="720",
         hint_key="control_input_flow",
